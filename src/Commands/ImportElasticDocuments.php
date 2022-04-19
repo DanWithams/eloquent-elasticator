@@ -3,7 +3,7 @@
 namespace DanWithams\EloquentElasticator\Commands;
 
 use Illuminate\Console\Command;
-use DanWithams\EloquentElasticator\Concerns\Elasticates;
+use DanWithams\EloquentElasticator\Contracts\Elasticatable;
 
 class ImportElasticDocuments extends Command
 {
@@ -14,10 +14,11 @@ class ImportElasticDocuments extends Command
     public function handle()
     {
         collect(scandir(app_path('Models')))
+            ->filter((fn ($file) => strpos($file, '.php')))
             ->map(fn ($file) => 'App\Models\\' . str_replace('.php', '', $file))
-            ->filter(fn ($classname) => collect((new \ReflectionClass($classname))
-                ->getTraits())
-                ->contains(Elasticates::class)
+            ->filter(fn ($classname) =>  collect((new \ReflectionClass($classname))
+                ->getInterfaceNames())
+                ->contains(Elasticatable::class)
             )
             ->each(function ($classname) {
                 collect(call_user_func($classname . '::all()'))
