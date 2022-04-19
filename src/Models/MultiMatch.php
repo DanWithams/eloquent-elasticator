@@ -9,6 +9,7 @@ class MultiMatch implements MatchCriteria
 {
     protected Collection $fields;
     protected string $type;
+    protected string $fuzziness;
     protected string $operator = 'or';
 
     const TYPE_BEST_FIELDS = 'best_fields';
@@ -45,38 +46,40 @@ class MultiMatch implements MatchCriteria
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * @param string $type
-     */
     public function setType(string $type): void
     {
         $this->type = $type;
     }
 
-    /**
-     * @return string
-     */
     public function getOperator(): string
     {
         return $this->operator;
     }
 
-    /**
-     * @param string $operator
-     */
     public function setOperator(string $operator): self
     {
         $operator = strtolower($operator);
         if (in_array($operator, ['and', 'or'])) {
             $this->operator = $operator;
+        }
+
+        return $this;
+    }
+
+    public function getFuzziness(): string
+    {
+        return $this->fuzziness;
+    }
+
+    public function setFuzziness(?string $fuzziness = null): self
+    {
+        if (is_null($fuzziness) || $fuzziness === 'AUTO') {
+            $this->fuzziness = $fuzziness;
         }
 
         return $this;
@@ -104,11 +107,14 @@ class MultiMatch implements MatchCriteria
     public function toArray()
     {
         return [
-            'multi_match' => [
-                'query' => $this->queryString,
-                'type' => $this->type,
-                'fields' => $this->fields->map(fn (Field $field) => (string) $field)->values()->all(),
-            ],
+            'multi_match' => collect([
+                    'query' => $this->queryString,
+                    'type' => $this->type,
+                    'fuzziness' => $this->fuzziness,
+                    'fields' => $this->fields->map(fn (Field $field) => (string) $field)->values()->all(),
+                ])
+                ->filter(fn ($value) => $value)
+                ->all(),
         ];
     }
 }

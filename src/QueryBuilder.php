@@ -26,6 +26,13 @@ class QueryBuilder
         return $this;
     }
 
+    public function fuzzy($fuzziness = 'AUTO'): self
+    {
+        $this->multiMatch->setFuzziness($fuzziness);
+
+        return $this;
+    }
+
     public function matches($queryString): self
     {
         $this->multiMatch->setQueryString($queryString);
