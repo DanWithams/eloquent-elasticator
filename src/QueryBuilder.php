@@ -19,14 +19,18 @@ class QueryBuilder
         $this->multiMatch = new MultiMatch();
     }
 
-    public function whereField($field, $boost = null)
+    public function whereField($field, $boost = null): self
     {
         $this->multiMatch->addField($field, new Field($field, $boost));
+
+        return $this;
     }
 
-    public function matches($queryString)
+    public function matches($queryString): self
     {
         $this->queryString = $queryString;
+
+        return $this;
     }
 
     public function get()
