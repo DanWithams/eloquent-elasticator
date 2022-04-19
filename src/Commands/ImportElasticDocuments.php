@@ -21,8 +21,8 @@ class ImportElasticDocuments extends Command
                 ->contains(Elasticatable::class)
             )
             ->each(function ($classname) {
-                collect(call_user_func($classname . '::all'))
-                    ->each->elasticate();
+                $models = collect(call_user_func($classname . '::all'));
+                $this->withProgressBar($models, fn ($model) => $model->elasticate());
             });
 
         return 0;
