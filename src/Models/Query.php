@@ -13,7 +13,7 @@ class Query
 
     public function setMatch(MatchCriteria $match): self
     {
-        $this->matches = $match;
+        $this->match = $match;
 
         return $this;
     }
