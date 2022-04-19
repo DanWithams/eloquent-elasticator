@@ -1,27 +1,25 @@
 <?php
 namespace DanWithams\EloquentElasticator\Models;
 
-use Illuminate\Support\Collection;
 use DanWithams\EloquentElasticator\Models\Contracts\MatchCriteria;
 
 class Query
 {
-    protected Collection $matches;
+    protected MatchCriteria $match;
 
     public function __construct()
     {
-        $this->matches = collect();
     }
 
-    public function addMatch(MatchCriteria $match): self
+    public function setMatch(MatchCriteria $match): self
     {
-        $this->matches->push($match);
+        $this->matches = $match;
 
         return $this;
     }
 
     public function toArray(): array
     {
-        return $this->matches->map->toArray()->all();
+        return $this->match->toArray();
     }
 }

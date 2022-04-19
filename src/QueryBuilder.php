@@ -39,7 +39,7 @@ class QueryBuilder
 
         $documents = $client->query([
             'query' => (new Query())
-                ->addMatch($this->multiMatch)
+                ->setMatch($this->multiMatch)
                 ->toArray(),
         ]);
 
