@@ -6,11 +6,10 @@ use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\MultiMatch;
-use DanWithams\EloquentElasticator\Contracts\Elasticatable;
 
 class QueryBuilder
 {
-    protected string, $index;
+    protected string $index;
     protected string $queryString;
     protected MultiMatch $multiMatch;
 

@@ -19,7 +19,7 @@ trait Elasticates
         return $this;
     }
 
-    public static function elastic()
+    public static function elastic(): QueryBuilder
     {
         return new QueryBuilder(__CLASS__);
     }
