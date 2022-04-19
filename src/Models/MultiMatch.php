@@ -9,7 +9,7 @@ class MultiMatch implements MatchCriteria
 {
     protected Collection $fields;
     protected string $type;
-    protected string $fuzziness;
+    protected ?string $fuzziness = null;
     protected string $operator = 'or';
 
     const TYPE_BEST_FIELDS = 'best_fields';
