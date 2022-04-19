@@ -35,11 +35,6 @@ class QueryBuilder
 
     public function get()
     {
-
-    }
-
-    public function toArray()
-    {
         $client = app(Client::class, ['index' => $this->index]);
 
         $documents = $client->query([
