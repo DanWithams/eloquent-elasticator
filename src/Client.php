@@ -26,7 +26,6 @@ class Client
             ])
             ->put('id', data_get($body, 'id', null))
             ->filter()
-            ->values()
             ->all()
         )->asArray();
     }
