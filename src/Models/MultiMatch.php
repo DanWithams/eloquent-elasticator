@@ -3,8 +3,9 @@
 namespace DanWithams\EloquentElasticator\Models;
 
 use Ramsey\Collection\Collection;
+use DanWithams\EloquentElasticator\Models\Contracts\MatchCriteria;
 
-class MultiMatch
+class MultiMatch implements MatchCriteria
 {
     protected Collection $fields;
     protected string $type;
@@ -83,7 +84,7 @@ class MultiMatch
 
     public function addField($name, $boost = 1): self
     {
-        $this->fields->push([
+        $this->fields->put($name, [
             'name' => $name,
             'boost' => $boost,
         ]);
@@ -109,7 +110,7 @@ class MultiMatch
             'multi_match' => [
                 'query' => $this->queryString,
                 'type' => $this->type,
-                'fields' => $this->fields->map(fn ($field) => $field['name'] . '^' . $field['boost'])
+                'fields' => $this->fields->map(fn (Field $field) => (string) $field)->values()->all(),
             ],
         ];
     }

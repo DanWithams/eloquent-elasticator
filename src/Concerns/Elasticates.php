@@ -6,7 +6,7 @@ use DanWithams\EloquentElasticator\Client;
 
 trait Elasticates
 {
-    public function elasticate()
+    public function elasticate(): self
     {
         if ($this->shouldElasticate()) {
             $index = $this->elasticatableAs();
@@ -14,5 +14,7 @@ trait Elasticates
             $client = app(Client::class, ['index' => $index]);
             $client->index($body);
         }
+
+        return $this;
     }
 }

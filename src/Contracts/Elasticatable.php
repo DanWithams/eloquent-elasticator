@@ -9,4 +9,6 @@ interface Elasticatable
     public function toElastic(): array;
 
     public function elasticatableAs(): string;
+
+    public function elasticate(): self;
 }
