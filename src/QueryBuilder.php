@@ -51,7 +51,7 @@ class QueryBuilder
         ]);
 
         $ids = collect(data_get($documents, 'hits.hits'))
-            ->pluck('id')
+            ->pluck('_id')
             ->all();
 
         return call_user_func($this->model . '::query')
