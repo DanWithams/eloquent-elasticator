@@ -1,6 +1,6 @@
 <?php
 
-namespace DanWithams\EloquentElasticator\Providers;
+namespace DanWithams\EloquentElasticator;
 
 use Spatie\LaravelPackageTools\Package;
 use DanWithams\EloquentElasticator\Client;
