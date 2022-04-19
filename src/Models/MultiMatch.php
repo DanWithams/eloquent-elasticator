@@ -82,12 +82,9 @@ class MultiMatch implements MatchCriteria
         return $this;
     }
 
-    public function addField($name, $boost = 1): self
+    public function addField($name, $boost = null): self
     {
-        $this->fields->put($name, [
-            'name' => $name,
-            'boost' => $boost,
-        ]);
+        $this->fields->put($name, new Field($name, $boost));
 
         return $this;
     }
