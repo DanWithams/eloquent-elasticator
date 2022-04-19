@@ -1,6 +1,6 @@
 <?php
 
-namespace Danwithams\EloquentElasticator\Contracts;
+namespace DanWithams\EloquentElasticator\Contracts;
 
 interface Elasticatable
 {
