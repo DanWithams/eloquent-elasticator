@@ -21,7 +21,7 @@ class QueryBuilder
 
     public function whereField($field, $boost = null): self
     {
-        $this->multiMatch->addField($field, new Field($field, $boost));
+        $this->multiMatch->addField(new Field($field, $boost));
 
         return $this;
     }
