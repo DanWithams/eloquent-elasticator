@@ -19,10 +19,16 @@ class Client
 
     public function index($body)
     {
-        return $this->client->index([
-            'index' => $this->index,
-            'body'  => $body,
-        ])->asArray();
+        return $this->client->index(
+            collect([
+                'index' => $this->index,
+                'body'  => $body,
+            ])
+            ->put('id', data_get($body, 'id', null))
+            ->filter()
+            ->values()
+            ->all()
+        )->asArray();
     }
 
     public function delete($id)

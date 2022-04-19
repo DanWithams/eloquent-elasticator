@@ -2,7 +2,7 @@
 
 namespace DanWithams\EloquentElasticator\Concerns;
 
-use DanWithams\EloquentElasticator\Client;
+use DanWithams\EloquentElasticator\Concerns\Client;
 
 trait Elasticates
 {
