@@ -28,7 +28,7 @@ class QueryBuilder
 
     public function matches($queryString): self
     {
-        $this->queryString = $queryString;
+        $this->multiMatch->setQueryString($queryString);
 
         return $this;
     }

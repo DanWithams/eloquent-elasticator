@@ -22,6 +22,6 @@ class Query
 
     public function toArray(): array
     {
-        return $this->matches->each->toArray();
+        return $this->matches->map->toArray()->all();
     }
 }
