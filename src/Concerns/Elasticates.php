@@ -3,7 +3,6 @@
 namespace DanWithams\EloquentElasticator\Concerns;
 
 use DanWithams\EloquentElasticator\QueryBuilder;
-use DanWithams\EloquentElasticator\Concerns\Client;
 
 trait Elasticates
 {

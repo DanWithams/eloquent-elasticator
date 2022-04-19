@@ -2,7 +2,7 @@
 
 namespace DanWithams\EloquentElasticator\Models;
 
-use Ramsey\Collection\Collection;
+use Illuminate\Support\Collection;
 use DanWithams\EloquentElasticator\Models\Contracts\MatchCriteria;
 
 class MultiMatch implements MatchCriteria
