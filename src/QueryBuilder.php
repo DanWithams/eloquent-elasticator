@@ -50,6 +50,12 @@ class QueryBuilder
                 ->toArray(),
         ]);
 
-        dd($documents);
+        $ids = collect(data_get($documents, 'hits.hits'))
+            ->pluck('id')
+            ->all();
+
+        return call_user_func($this->model . '::query')
+            ->whereIn('id', $ids)
+            ->get();
     }
 }
