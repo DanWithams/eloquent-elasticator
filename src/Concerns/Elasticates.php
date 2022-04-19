@@ -2,6 +2,7 @@
 
 namespace DanWithams\EloquentElasticator\Concerns;
 
+use DanWithams\EloquentElasticator\QueryBuilder;
 use DanWithams\EloquentElasticator\Concerns\Client;
 
 trait Elasticates
@@ -16,5 +17,10 @@ trait Elasticates
         }
 
         return $this;
+    }
+
+    public static function elastic()
+    {
+        return new QueryBuilder(__CLASS__);
     }
 }

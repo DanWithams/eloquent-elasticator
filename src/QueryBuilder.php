@@ -4,21 +4,20 @@ namespace DanWithams\EloquentElasticator;
 
 use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
+use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\MultiMatch;
+use DanWithams\EloquentElasticator\Contracts\Elasticatable;
 
 class QueryBuilder
 {
+    protected string, $index;
     protected string $queryString;
     protected MultiMatch $multiMatch;
 
-    public function __construct()
+    public function __construct(protected string $model)
     {
+        $this->index = (new $this->model)->elasticatableAs();
         $this->multiMatch = new MultiMatch();
-    }
-
-    public static function query()
-    {
-        return new self();
     }
 
     public function whereField($field, $boost = null)
@@ -31,12 +30,21 @@ class QueryBuilder
         $this->queryString = $queryString;
     }
 
+    public function get()
+    {
+
+    }
+
     public function toArray()
     {
-        return [
+        $client = app(Client::class, ['index' => $this->index]);
+
+        $documents = $client->query([
             'query' => (new Query())
                 ->addMatch($this->multiMatch)
                 ->toArray(),
-        ];
+        ]);
+
+        dd($documents);
     }
 }
