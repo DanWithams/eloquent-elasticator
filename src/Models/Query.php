@@ -1,17 +1,17 @@
 <?php
 namespace DanWithams\EloquentElasticator\Models;
 
-use DanWithams\EloquentElasticator\Models\Contracts\MatchCriteria;
+use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
 class Query
 {
-    protected MatchCriteria $match;
+    protected QueryCriteria $match;
 
     public function __construct()
     {
     }
 
-    public function setMatch(MatchCriteria $match): self
+    public function setMatch(QueryCriteria $match): self
     {
         $this->match = $match;
 

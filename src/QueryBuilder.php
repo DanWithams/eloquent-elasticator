@@ -9,7 +9,8 @@ use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\SortItem;
-use DanWithams\EloquentElasticator\Models\MultiMatch;
+use DanWithams\EloquentElasticator\Models\MultiQuery;
+use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
 class QueryBuilder
 {
@@ -17,12 +18,12 @@ class QueryBuilder
 
     protected string $index;
     protected Builder $query;
-    protected MultiMatch $multiMatch;
+    protected QueryCriteria $criteria;
     protected Sort $sort;
 
     public function __construct(protected string $model)
     {
-        $this->multiMatch = new MultiMatch();
+        $this->criteria = new MultiQuery();
         $this->sort = new Sort();
         $this->index = (new $this->model)->elasticatableAs();
         $this->query = call_user_func($this->model . '::query');
@@ -37,21 +38,21 @@ class QueryBuilder
 
     public function whereField($field, $boost = null): self
     {
-        $this->multiMatch->addField(new Field($field, $boost));
+        $this->criteria->addField(new Field($field, $boost));
 
         return $this;
     }
 
     public function fuzzy($fuzziness = 'AUTO'): self
     {
-        $this->multiMatch->setFuzziness($fuzziness);
+        $this->criteria->setFuzziness($fuzziness);
 
         return $this;
     }
 
     public function matches($queryString): self
     {
-        $this->multiMatch->setQueryString($queryString);
+        $this->criteria->setQueryString($queryString);
 
         return $this;
     }
@@ -67,12 +68,12 @@ class QueryBuilder
 
     public function get()
     {
-        if ($this->multiMatch->getQueryString()) {
+        if ($this->criteria->getQueryString()) {
             $client = app(Client::class, ['index' => $this->index]);
 
             $body = [
                 'query' => (new Query())
-                    ->setMatch($this->multiMatch)
+                    ->setMatch($this->criteria)
                     ->toArray(),
             ];
 
