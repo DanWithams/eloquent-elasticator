@@ -6,6 +6,17 @@ use DanWithams\EloquentElasticator\QueryBuilder;
 
 trait Elasticates
 {
+    public static function bootElasticates()
+    {
+        static::saved(function ($model) {
+            $model->elasticate();
+        });
+
+        static::deleted(function ($model) {
+            $model->elasticate();
+        });
+    }
+
     public function elasticate(): self
     {
         $client = app(Client::class, ['index' => $this->elasticatableAs()]);
