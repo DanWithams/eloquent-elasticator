@@ -2,11 +2,10 @@
 
 namespace DanWithams\EloquentElasticator;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Traits\ForwardsCalls;
 use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
-use DanWithams\EloquentElasticator\Models\Results;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\MultiMatch;
 
