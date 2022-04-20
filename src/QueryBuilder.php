@@ -67,25 +67,30 @@ class QueryBuilder
 
     public function get()
     {
-        $client = app(Client::class, ['index' => $this->index]);
+        if ($this->multiMatch->getQueryString()) {
+            $client = app(Client::class, ['index' => $this->index]);
 
-        $body = [
-            'query' => (new Query())
-                ->setMatch($this->multiMatch)
-                ->toArray(),
-        ];
+            $body = [
+                'query' => (new Query())
+                    ->setMatch($this->multiMatch)
+                    ->toArray(),
+            ];
 
-        if ($this->sort->count()) {
-            $body['sort'] = $this->sort->toArray();
+            if ($this->sort->count()) {
+                $body['sort'] = $this->sort->toArray();
+            }
+
+            $documents = $client->query($body);
+
+            $ids = collect(data_get($documents, 'hits.hits'))
+                ->pluck('_id');
+
+            $this->query->whereIn('id', $ids->all());
+        } else {
+            $ids = collect();
         }
 
-        $documents = $client->query($body);
-
-        $ids = collect(data_get($documents, 'hits.hits'))
-            ->pluck('_id');
-
-        $models = $this->query->whereIn('id', $ids->all())
-            ->get();
+        $models = $this->query->get();
 
         return $models->sort(fn ($a, $b) => $ids->search($a->id) <=> $ids->search($b->id))
             ->values();
