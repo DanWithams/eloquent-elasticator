@@ -26,6 +26,6 @@ class Sort
 
     public function toArray(): array
     {
-        return $this->sorts->map->toArray();
+        return $this->sorts->map->toArray()->all();
     }
 }
