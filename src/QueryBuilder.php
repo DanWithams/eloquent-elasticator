@@ -4,9 +4,11 @@ namespace DanWithams\EloquentElasticator;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Traits\ForwardsCalls;
+use DanWithams\EloquentElasticator\Models\Sort;
 use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
+use DanWithams\EloquentElasticator\Models\SortItem;
 use DanWithams\EloquentElasticator\Models\MultiMatch;
 
 class QueryBuilder
@@ -16,11 +18,13 @@ class QueryBuilder
     protected string $index;
     protected Builder $query;
     protected MultiMatch $multiMatch;
+    protected Sort $sort;
 
     public function __construct(protected string $model)
     {
-        $this->index = (new $this->model)->elasticatableAs();
         $this->multiMatch = new MultiMatch();
+        $this->sort = new Sort();
+        $this->index = (new $this->model)->elasticatableAs();
         $this->query = call_user_func($this->model . '::query');
     }
 
@@ -52,15 +56,30 @@ class QueryBuilder
         return $this;
     }
 
+    public function orderBy($field, $direction): self
+    {
+        $this->sort->addSort(
+            new SortItem($field, $direction)
+        );
+
+        return $this;
+    }
+
     public function get()
     {
         $client = app(Client::class, ['index' => $this->index]);
 
-        $documents = $client->query([
+        $body = [
             'query' => (new Query())
                 ->setMatch($this->multiMatch)
                 ->toArray(),
-        ]);
+        ];
+
+        if ($this->sort->count()) {
+            $body['sort'] = $this->sort->toArray();
+        }
+
+        $documents = $client->query($body);
 
         $ids = collect(data_get($documents, 'hits.hits'))
             ->pluck('_id');
