@@ -9,7 +9,7 @@ use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\SortItem;
-use DanWithams\EloquentElasticator\Models\MultiQuery;
+use DanWithams\EloquentElasticator\Models\QueryString;
 use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
 class QueryBuilder
@@ -23,7 +23,7 @@ class QueryBuilder
 
     public function __construct(protected string $model)
     {
-        $this->criteria = new MultiQuery();
+        $this->criteria = new QueryString();
         $this->sort = new Sort();
         $this->index = (new $this->model)->elasticatableAs();
         $this->query = call_user_func($this->model . '::query');
