@@ -5,7 +5,7 @@ namespace DanWithams\EloquentElasticator\Models;
 use Illuminate\Support\Collection;
 use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
-class MultiQuery implements QueryCriteria
+class MultiMatch implements QueryCriteria
 {
     protected Collection $fields;
     protected string $type;

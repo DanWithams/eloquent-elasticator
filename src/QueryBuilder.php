@@ -2,6 +2,7 @@
 
 namespace DanWithams\EloquentElasticator;
 
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Traits\ForwardsCalls;
 use DanWithams\EloquentElasticator\Models\Sort;
@@ -9,8 +10,8 @@ use DanWithams\EloquentElasticator\Models\Query;
 use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\SortItem;
+use DanWithams\EloquentElasticator\Models\MultiMatch;
 use DanWithams\EloquentElasticator\Models\QueryString;
-use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
 class QueryBuilder
 {
@@ -18,12 +19,15 @@ class QueryBuilder
 
     protected string $index;
     protected Builder $query;
-    protected QueryCriteria $criteria;
+    protected Collection $criteria;
     protected Sort $sort;
 
     public function __construct(protected string $model)
     {
-        $this->criteria = new QueryString();
+        $this->criteria = collect([
+            new QueryString(),
+            new MultiMatch()
+        ]);
         $this->sort = new Sort();
         $this->index = (new $this->model)->elasticatableAs();
         $this->query = call_user_func($this->model . '::query');
@@ -38,21 +42,21 @@ class QueryBuilder
 
     public function whereField($field, $boost = null): self
     {
-        $this->criteria->addField(new Field($field, $boost));
+        $this->criteria->each->addField(new Field($field, $boost));
 
         return $this;
     }
 
     public function fuzzy($fuzziness = 'AUTO'): self
     {
-        $this->criteria->setFuzziness($fuzziness);
+        $this->criteria->each->setFuzziness($fuzziness);
 
         return $this;
     }
 
     public function matches($queryString): self
     {
-        $this->criteria->setQueryString($queryString);
+        $this->criteria->each->setQueryString($queryString);
 
         return $this;
     }
@@ -68,20 +72,24 @@ class QueryBuilder
 
     public function get()
     {
-        if ($this->criteria->getQueryString()) {
-            $client = app(Client::class, ['index' => $this->index]);
+        if ($this->criteria->first()->getQueryString()) {
 
-            $body = [
-                'query' => (new Query())
-                    ->setMatch($this->criteria)
-                    ->toArray(),
-            ];
 
-            if ($this->sort->count()) {
-                $body['sort'] = $this->sort->toArray();
-            }
+            $documents = $this->criteria->map(function () {
+                $client = app(Client::class, ['index' => $this->index]);
 
-            $documents = $client->query($body);
+                $body = [
+                    'query' => (new Query())
+                        ->setMatch($this->criteria)
+                        ->toArray(),
+                ];
+
+                if ($this->sort->count()) {
+                    $body['sort'] = $this->sort->toArray();
+                }
+
+                return $client->query($body);
+            })->flatten(1);
 
             $ids = collect(data_get($documents, 'hits.hits'))
                 ->pluck('_id');
