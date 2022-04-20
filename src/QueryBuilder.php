@@ -68,8 +68,7 @@ class QueryBuilder
         $models = $this->query->whereIn('id', $ids->all())
             ->get();
 
-        return $models->sort(
-            fn ($a, $b) => $ids->search($a->id) <=> $ids->search($b->id)
-        );
+        return $models->sort(fn ($a, $b) => $ids->search($a->id) <=> $ids->search($b->id))
+            ->values();
     }
 }
