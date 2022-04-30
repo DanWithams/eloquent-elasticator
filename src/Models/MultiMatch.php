@@ -9,7 +9,7 @@ class MultiMatch implements QueryCriteria
 {
     protected Collection $fields;
     protected string $type;
-    protected ?string $fuzziness = null;
+    protected int|string|null $fuzziness = null;
     protected string $operator = 'or';
 
     const TYPE_BEST_FIELDS = 'best_fields';
@@ -71,14 +71,14 @@ class MultiMatch implements QueryCriteria
         return $this;
     }
 
-    public function getFuzziness(): string
+    public function getFuzziness(): int|string|null
     {
         return $this->fuzziness;
     }
 
-    public function setFuzziness(?string $fuzziness = null): self
+    public function setFuzziness(int|string|null $fuzziness = null): self
     {
-        if (is_null($fuzziness) || $fuzziness === 'AUTO') {
+        if (!is_string($fuzziness) || $fuzziness === 'AUTO') {
             $this->fuzziness = $fuzziness;
         }
 
