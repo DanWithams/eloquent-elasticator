@@ -2,6 +2,7 @@
 
 namespace DanWithams\EloquentElasticator;
 
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Traits\ForwardsCalls;
 use DanWithams\EloquentElasticator\Models\Sort;
@@ -10,6 +11,7 @@ use DanWithams\EloquentElasticator\Models\Field;
 use DanWithams\EloquentElasticator\Concerns\Client;
 use DanWithams\EloquentElasticator\Models\SortItem;
 use DanWithams\EloquentElasticator\Models\MultiMatch;
+use DanWithams\EloquentElasticator\Models\QueryString;
 use DanWithams\EloquentElasticator\Models\Contracts\QueryCriteria;
 
 class QueryBuilder
@@ -18,15 +20,20 @@ class QueryBuilder
 
     protected string $index;
     protected Builder $query;
-    protected QueryCriteria $criteria;
+    protected Collection $criteria;
     protected Sort $sort;
+    protected $client;
 
     public function __construct(protected string $model)
     {
-        $this->criteria = new MultiMatch();
+        $this->criteria = collect([
+            new MultiMatch(),
+            new QueryString()
+        ]);
         $this->sort = new Sort();
         $this->index = (new $this->model)->elasticatableAs();
         $this->query = call_user_func($this->model . '::query');
+        $this->client = app(Client::class, ['index' => $this->index]);
     }
 
     public function __call($name, $arguments)
@@ -38,21 +45,21 @@ class QueryBuilder
 
     public function whereField($field, $boost = null): self
     {
-        $this->criteria->addField(new Field($field, $boost));
+        $this->criteria->each->addField(new Field($field, $boost));
 
         return $this;
     }
 
     public function fuzzy($fuzziness = 'AUTO'): self
     {
-        $this->criteria->setFuzziness($fuzziness);
+        $this->criteria->each->setFuzziness($fuzziness);
 
         return $this;
     }
 
     public function matches($queryString): self
     {
-        $this->criteria->setQueryString($queryString);
+        $this->criteria->each->setQueryString($queryString);
 
         return $this;
     }
@@ -68,28 +75,33 @@ class QueryBuilder
 
     public function get()
     {
-        if ($this->criteria->getQueryString()) {
-            $client = app(Client::class, ['index' => $this->index]);
+        $ids = $this->criteria->map(function (QueryCriteria $criteria) {
+                $body = [
+                    'query' => (new Query())
+                        ->setMatch($criteria)
+                        ->toArray(),
+                ];
 
-            $body = [
-                'query' => (new Query())
-                    ->setMatch($this->criteria)
-                    ->toArray(),
-            ];
+                if ($this->sort->count()) {
+                    $body['sort'] = $this->sort->toArray();
+                }
 
-            if ($this->sort->count()) {
-                $body['sort'] = $this->sort->toArray();
-            }
+                $documents = $this->client->query($body);
 
-            $documents = $client->query($body);
+                return data_get($documents, 'hits.hits');
+            })
+            ->flatten(1)
+            ->groupBy('_id')
+            ->map(function ($hits) {
+                $hit = $hits->first();
+                $hit['_score'] = $hits->avg('_score');
+                return $hit;
+            })
+            ->sort(fn ($a, $b) => $a['_score'] <=> $b['_score'])
+            ->values()
+            ->pluck('_id');
 
-            $ids = collect(data_get($documents, 'hits.hits'))
-                ->pluck('_id');
-
-            $this->query->whereIn('id', $ids->all());
-        } else {
-            $ids = collect();
-        }
+        $this->query->whereIn('id', $ids->all());
 
         $models = $this->query->get();
 
