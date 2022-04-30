@@ -75,7 +75,8 @@ class QueryBuilder
 
     public function get()
     {
-        $ids = $this->criteria->map(function (QueryCriteria $criteria) {
+        $ids = $this->criteria->filter(fn (QueryCriteria $criteria) => $criteria->getQueryString())
+            ->map(function (QueryCriteria $criteria) {
                 $body = [
                     'query' => (new Query())
                         ->setMatch($criteria)
@@ -100,6 +101,10 @@ class QueryBuilder
             ->sort(fn ($a, $b) => $a['_score'] <=> $b['_score'])
             ->values()
             ->pluck('_id');
+
+        if ($ids->count() === 0) {
+            return $this->query->get();
+        }
 
         $this->query->whereIn('id', $ids->all());
 
